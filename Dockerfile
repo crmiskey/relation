@@ -1,12 +1,22 @@
-# Use JDK 21 (Alpine is a lightweight Linux version)
-FROM eclipse-temurin:21-jdk-alpine
-
-# Set the working directory
+# --- STAGE 1: Build the application ---
+FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
 WORKDIR /app
 
-# Copy the generated JAR file into the container
-# Ensure you run './mvnw package' or './gradlew build' before this
-COPY target/*.jar app.jar
+# Copy the pom.xml and source code
+COPY pom.xml .
+COPY src ./src
 
-# Run the application
+# Build the application (skipping tests to save time/memory)
+RUN mvn clean package -DskipTests
+
+# --- STAGE 2: Run the application ---
+FROM eclipse-temurin:21-jdk-alpine
+WORKDIR /app
+
+# Copy the JAR from the 'build' stage to this final stage
+COPY --from=build /app/target/*.jar app.jar
+
+# Set memory limits for Render's free tier
+ENV JAVA_OPTS="-Xmx384m -Xms384m"
+
 ENTRYPOINT ["java", "-jar", "app.jar"]
