@@ -16,6 +16,7 @@ public class PersonNode {
     private int depth;
 
     private List<PersonNode> children = new ArrayList<>();
+    private List<PersonNode> spouses = new ArrayList<>();
 
     public PersonNode(Person person, int depth) {
         this.id = person.getId();

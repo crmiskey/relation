@@ -32,7 +32,6 @@ public class RelationshipTreeService {
                                       int maxDepth,
                                       Set<String> visited) {
 
-        // stop conditions
         if (personId == null || visited.contains(personId) || currentDepth > maxDepth) {
             return null;
         }
@@ -47,32 +46,52 @@ public class RelationshipTreeService {
         List<Relation> relations;
 
         if ("ancestors".equalsIgnoreCase(direction)) {
-            // child → parent
             relations = relationRepo.findByFrom(personId);
         } else {
-            // parent → children
             relations = relationRepo.findByTo(personId);
         }
 
         for (Relation rel : relations) {
 
-            // Only process parent relationships (safe guard)
-            if (!"parent".equalsIgnoreCase(rel.getType())) continue;
+            String type = rel.getType();
 
-            String nextId = "ancestors".equalsIgnoreCase(direction)
-                    ? rel.getTo()   // parent
-                    : rel.getFrom(); // child
+            // -------------------------
+            // 1. PARENT / CHILD TREE
+            // -------------------------
+            if ("parent".equalsIgnoreCase(type)) {
 
-            PersonNode childNode = buildRecursive(
-                    nextId,
-                    direction,
-                    currentDepth + 1,
-                    maxDepth,
-                    visited
-            );
+                String nextId = "ancestors".equalsIgnoreCase(direction)
+                        ? rel.getTo()
+                        : rel.getFrom();
 
-            if (childNode != null) {
-                node.getChildren().add(childNode);
+                PersonNode childNode = buildRecursive(
+                        nextId,
+                        direction,
+                        currentDepth + 1,
+                        maxDepth,
+                        visited
+                );
+
+                if (childNode != null) {
+                    node.getChildren().add(childNode);
+                }
+            }
+
+            // -------------------------
+            // 2. SPOUSE (SIDE LINK)
+            // -------------------------
+            else if ("spouse".equalsIgnoreCase(type)) {
+
+                String spouseId = rel.getFrom().equals(personId)
+                        ? rel.getTo()
+                        : rel.getFrom();
+
+                // DO NOT recurse into spouse (prevents cycles)
+                Person spouse = personRepo.findById(spouseId).orElse(null);
+
+                if (spouse != null) {
+                    node.getSpouses().add(new PersonNode(spouse, currentDepth));
+                }
             }
         }
 
