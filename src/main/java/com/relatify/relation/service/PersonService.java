@@ -33,9 +33,9 @@ public class PersonService {
             criteriaList.add(Criteria.where("name").regex(request.getName(), "i"));
         }
 
-        if (request.getGender() != null && !request.getGender().isEmpty()) {
+        /*if (request.getGender() != null && !request.getGender().isEmpty()) {
             criteriaList.add(Criteria.where("gender").is(request.getGender()));
-        }
+        }*/
 
         if (!criteriaList.isEmpty()) {
             query.addCriteria(new Criteria().andOperator(criteriaList));
