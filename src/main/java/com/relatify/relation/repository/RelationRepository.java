@@ -11,4 +11,6 @@ public interface RelationRepository extends MongoRepository<Relation, String> {
     List<Relation> findByFrom(String from);
 
     List<Relation> findByTo(String to);
+
+    List<Relation> findByFromOrTo(String from, String to);
 }
