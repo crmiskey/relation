@@ -21,9 +21,11 @@ public class AuthController {
     public ResponseEntity<?> googleLogin(@RequestBody Map<String, String> request) throws Exception {
 
         String token = request.get("token");
+        System.out.println("🔥 HIT GOOGLE LOGIN API");
+        return ResponseEntity.ok("test");
 
-        return ResponseEntity.ok(
+/*        return ResponseEntity.ok(
                 googleAuthService.authenticate(token)
-        );
+        );*/
     }
 }

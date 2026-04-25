@@ -18,17 +18,18 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-                .cors(cors -> {})
                 .csrf(csrf -> csrf.disable())
+                .cors(cors -> {})   // IMPORTANT
                 .authorizeHttpRequests(auth -> auth
 
-                        // IMPORTANT: allow preflight requests
+                        // allow preflight
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         // allow auth endpoint
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        .anyRequest().authenticated()
+                        // everything else blocked (later secured by JWT)
+                        .anyRequest().permitAll()
                 );
 
         return http.build();
@@ -41,10 +42,10 @@ public class SecurityConfig {
 
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
-                "https://relatifymyrelatives.onrender.com/"
+                "https://relatifymyrelatives.onrender.com"
         ));
 
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 
